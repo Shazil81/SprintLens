@@ -1,5 +1,6 @@
 """A bounded Gemini text adapter; no tools, source-code access or automatic retries."""
 import json
+from copy import deepcopy
 import re
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, HTTPRedirectHandler, build_opener
@@ -57,10 +58,15 @@ def validate_output(value, allowed_ids):
 def generate_insight(snapshot, model):
     if not re.fullmatch(r'gemini-[a-zA-Z0-9.-]{1,80}',model):
         raise ProviderError('Configure a valid Gemini model name.')
-    payload = {'systemInstruction':{'parts':[{'text':INSTRUCTIONS}]},
+    schema = deepcopy(SCHEMA)
+    # Restrict citations at generation time as well as validating the final result.
+    citation_schema = schema['properties']['findings']['items']['properties']['evidence_ids']
+    citation_schema.update(minItems=1, maxItems=10)
+    citation_schema['items']['enum'] = sorted(snapshot['evidence'])
+    payload = {'systemInstruction':{'parts':[{'text':INSTRUCTIONS + '\nValid evidence IDs are exactly: ' + json.dumps(sorted(snapshot['evidence']))}]},
                'contents':[{'role':'user','parts':[{'text':json.dumps(snapshot,ensure_ascii=False)}]}],
                'generationConfig':{'maxOutputTokens':2500,'temperature':0.2,
-                                   'responseMimeType':'application/json','responseJsonSchema':SCHEMA}}
+                                   'responseMimeType':'application/json','responseJsonSchema':schema}}
     request = Request(f'https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent',
                       data=json.dumps(payload).encode('utf-8'),method='POST',
                       headers={'Content-Type':'application/json','x-goog-api-key':settings.GEMINI_API_KEY})

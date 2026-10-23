@@ -1,0 +1,38 @@
+# PostgreSQL stays on the host/managed service. This stack never creates a PostgreSQL container.
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "127.0.0.1:6379:6379"
+    volumes:
+      - sprintlens-redis:/data
+    command: ["redis-server", "--appendonly", "yes"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+  worker:
+    profiles: ["workers"]
+    build: ./backend
+    environment: &worker-environment
+      DJANGO_DEBUG: "0"
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-}
+      DJANGO_CSRF_TRUSTED_ORIGINS: ${DJANGO_CSRF_TRUSTED_ORIGINS:-}
+      DATABASE_URL: ${SPRINTLENS_WORKER_DATABASE_URL:-}
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      redis:
+        condition: service_healthy
+    command: ["celery", "-A", "config", "worker", "--loglevel=INFO", "--concurrency=2"]
+  beat:
+    profiles: ["workers"]
+    build: ./backend
+    environment: *worker-environment
+    depends_on:
+      redis:
+        condition: service_healthy
+    command: ["celery", "-A", "config", "beat", "--loglevel=INFO", "--schedule=/tmp/celerybeat-schedule"]
+volumes:
+  sprintlens-redis:

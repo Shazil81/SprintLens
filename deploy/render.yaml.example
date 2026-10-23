@@ -1,0 +1,94 @@
+# Reviewed preparation template, not an active deployment.
+# Copy to the repository root as render.yaml only during Step 29 after reviewing current plans/costs.
+# The complete API + worker + beat topology requires separately priced services; it is not a free-stack promise.
+# FIRST create the shared environment group sprintlens-production in the Render dashboard.
+# Add DJANGO_DEBUG=0, a private 50+ character DJANGO_SECRET_KEY,
+# exact DJANGO_ALLOWED_HOSTS and DJANGO_CSRF_TRUSTED_ORIGINS values from backend/.env.example.
+# Render ignores sync:false in groups; generated 256-bit secrets are shorter than Django's 50-character check.
+# A manually provisioned shared group keeps one stable secret across API/worker/beat.
+
+services:
+  - type: web
+    name: sprintlens-api
+    runtime: python
+    region: singapore
+    plan: 0.5c-512mb
+    rootDir: backend
+    buildCommand: bash scripts/build.sh
+    preDeployCommand: bash scripts/release.sh
+    startCommand: bash scripts/start.sh
+    healthCheckPath: /health/ready/
+    envVars:
+      - fromGroup: sprintlens-production
+      - key: PYTHON_VERSION
+        value: 3.12.15
+      - key: DATABASE_URL
+        fromDatabase:
+          name: sprintlens-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: sprintlens-redis
+          property: connectionString
+
+  - type: worker
+    name: sprintlens-worker
+    runtime: python
+    region: singapore
+    plan: 0.5c-512mb
+    rootDir: backend
+    buildCommand: bash scripts/build.sh
+    startCommand: python -m celery -A config worker --loglevel=INFO --concurrency=2
+    envVars:
+      - fromGroup: sprintlens-production
+      - key: PYTHON_VERSION
+        value: 3.12.15
+      - key: DATABASE_URL
+        fromDatabase:
+          name: sprintlens-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: sprintlens-redis
+          property: connectionString
+
+  - type: worker
+    name: sprintlens-beat
+    runtime: python
+    region: singapore
+    plan: 0.5c-512mb
+    rootDir: backend
+    buildCommand: bash scripts/build.sh
+    # Run exactly one scheduler instance. Recreated state may replay a dispatch; jobs deduplicate records.
+    startCommand: python -m celery -A config beat --loglevel=INFO --schedule=/tmp/sprintlens-beat
+    envVars:
+      - fromGroup: sprintlens-production
+      - key: PYTHON_VERSION
+        value: 3.12.15
+      - key: DATABASE_URL
+        fromDatabase:
+          name: sprintlens-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: sprintlens-redis
+          property: connectionString
+
+  - type: keyvalue
+    name: sprintlens-redis
+    region: singapore
+    plan: 256mb
+    maxmemoryPolicy: noeviction
+    ipAllowList: []
+
+databases:
+  - name: sprintlens-db
+    region: singapore
+    plan: 0.1c-256mb
+    databaseName: sprintlens
+    user: sprintlens
+    postgresMajorVersion: "18"
+    ipAllowList: []

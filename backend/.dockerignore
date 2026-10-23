@@ -1,0 +1,10 @@
+.venv
+.local.json
+.local.json.tmp
+.local-webhook-setup.json
+.local-backups
+db.sqlite3
+__pycache__
+*.log
+.env*
+celerybeat-schedule*

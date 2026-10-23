@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.env
+.env.*.local
+__pycache__/
+.venv/
+.local.json
+.local.json.tmp
+.local-webhook-setup.json
+.tools/
+db.sqlite3
+staticfiles/
+*.log
+celerybeat-schedule*
+.local-backups/

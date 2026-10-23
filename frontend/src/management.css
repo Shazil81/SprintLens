@@ -1,0 +1,122 @@
+/* Project and account controls follow the existing light workspace theme. */
+.projects-section .row > .col-md-4 {
+  display: flex;
+  flex-direction: column;
+}
+.projects-section .project-card {
+  height: auto;
+  flex: 1;
+}
+.project-create {
+  margin: 0 0 20px auto;
+  display: flex;
+}
+.project-manage-actions {
+  display: flex;
+  justify-content: space-between;
+  border: 1px solid #e4e4e4;
+  border-top: 0;
+  border-radius: 0 0 10px 10px;
+  margin-top: -7px;
+  padding: 18px 20px 13px;
+  background: white;
+}
+.project-manage-actions .text-button {
+  font-size: 10px;
+  gap: 6px;
+}
+.management-dialog {
+  width: 500px;
+}
+.management-dialog textarea {
+  font: inherit;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 10px;
+  min-height: 90px;
+  resize: vertical;
+}
+.management-dialog input[readonly] {
+  background: #f8f8f8;
+  color: #909090;
+}
+.field-help {
+  font-size: 10px;
+  color: #999;
+  line-height: 1.7;
+}
+.member-selection {
+  max-height: 320px;
+  overflow: auto;
+  border: 1px solid #e8e8e8;
+  border-radius: 8px;
+  margin: 17px 0;
+}
+.management-dialog .member-option {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 15px;
+  border-bottom: 1px solid #eee;
+  margin: 0;
+  cursor: pointer;
+}
+.member-option:last-child {
+  border: 0;
+}
+.member-option input {
+  width: 16px;
+  height: 16px;
+  accent-color: #2e64e7;
+  flex-shrink: 0;
+}
+.member-option b {
+  font-size: 12px;
+  font-weight: 500;
+}
+.member-option small {
+  display: block;
+  font-size: 10px;
+  color: #999;
+  margin-top: 5px;
+}
+.member-card-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+.you-label {
+  font-family: "DM Sans";
+  font-size: 9px;
+  font-weight: 400;
+  border: 1px solid #e7e7e7;
+  border-radius: 4px;
+  padding: 3px 6px;
+  vertical-align: middle;
+  margin-left: 9px;
+  color: #999;
+}
+.management-dialog h2 {
+  font-size: 21px;
+}
+.management-dialog .button {
+  font-size: 12px;
+}
+@media (max-width: 575px) {
+  .project-manage-actions {
+    padding: 16px 14px 12px;
+  }
+  .project-manage-actions .text-button {
+    font-size: 10px;
+  }
+  .member-card-actions .text-button {
+    font-size: 10px;
+  }
+  .management-dialog {
+    padding: 22px;
+  }
+  .management-dialog h2 {
+    font-size: 19px;
+  }
+}

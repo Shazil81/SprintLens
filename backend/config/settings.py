@@ -91,6 +91,8 @@ CELERY_TASK_SERIALIZER = 'json'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_IGNORE_RESULT = True
 CELERY_TASK_DEFAULT_QUEUE = 'sprintlens'
+# Isolate broker bookkeeping as well as queues when Redis is shared.
+CELERY_BROKER_TRANSPORT_OPTIONS = {'global_keyprefix': 'sprintlens:broker:'}
 CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True
 CELERY_TIMEZONE = TIME_ZONE
 CELERY_TASK_SOFT_TIME_LIMIT = 240

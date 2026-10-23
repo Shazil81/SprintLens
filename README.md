@@ -2,6 +2,13 @@
 
 **Developer activity, project delivery, audits and growth in one workspace.**
 
+[![Live application](https://img.shields.io/badge/Open_SprintLens-Live_App-2563EB?logo=vercel&logoColor=white)](https://sprintlens-kohl.vercel.app/)
+[![Production notifications](https://github.com/Shazil81/SprintLens/actions/workflows/production-notifications.yml/badge.svg)](https://github.com/Shazil81/SprintLens/actions/workflows/production-notifications.yml)
+
+**Live app:** [sprintlens-kohl.vercel.app](https://sprintlens-kohl.vercel.app/)
+
+Access is managed by a workspace administrator. There is no public signup, and credentials are not published. The free backend may take about a minute to wake up after inactivity.
+
 ![React](https://img.shields.io/badge/React-20232A?logo=react&logoColor=61DAFB)
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?logo=typescript&logoColor=white)
 ![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white)
@@ -19,6 +26,9 @@
 ![Gemini](https://img.shields.io/badge/Gemini-8E75B2?logo=googlegemini&logoColor=white)
 ![Vercel](https://img.shields.io/badge/Vercel-000000?logo=vercel&logoColor=white)
 ![Render](https://img.shields.io/badge/Render-000000?logo=render&logoColor=white)
+![Neon](https://img.shields.io/badge/Neon-00E599?logo=neon&logoColor=black)
+![Upstash](https://img.shields.io/badge/Upstash-00E9A3?logo=upstash&logoColor=black)
+![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?logo=githubactions&logoColor=white)
 
 ## What it does
 
@@ -37,12 +47,12 @@ SprintLens helps teams track delivery, surface blockers and review engineering w
 ```mermaid
 flowchart TB
     Users[Admin / Manager / Developer] --> UI
-    subgraph Frontend[React application - Vercel target]
+    subgraph Frontend[React application - Vercel]
         UI[React + TypeScript + Bootstrap grid + CSS]
         UI --> Client[Fetch client / session state / CSRF header]
         Client --> Proxy[Same-origin API proxy]
     end
-    subgraph Backend[Django API - Render target]
+    subgraph Backend[Django API - Render]
         API[Django REST Framework]
         Auth[Session authentication + CSRF]
         Access[Organization / project / reviewer permissions]
@@ -52,12 +62,15 @@ flowchart TB
         Logic --> Audit
     end
     Proxy -->|HTTPS /api/v1| API
-    Logic --> DB[(PostgreSQL)]
+    Logic --> DB[(Neon PostgreSQL)]
     Audit --> DB
-    Beat[Celery Beat] -->|Scheduled jobs| Redis[(Redis broker)]
-    Redis --> Worker[Celery worker]
-    Worker -->|Persist notifications| DB
-    API -->|Production shared cache| Redis
+    Actions[GitHub Actions - every 30 minutes] --> Command[Django run_notifications command]
+    Command -->|Persist reminders and digests| DB
+    API -->|Production shared cache| Redis[(Upstash Redis)]
+    subgraph LocalJobs[Local / optional dedicated worker deployment]
+        Beat[Celery Beat] --> Broker[(Redis broker)]
+        Broker --> Worker[Celery worker]
+    end
     GitHub[GitHub repositories] -->|Signed, deduplicated webhooks| API
     Logic -->|Explicitly approved project snapshot| Gemini[Google Gemini API]
     Gemini -->|Reviewable insight drafts| Logic
@@ -135,7 +148,19 @@ npm run test:production
 
 ## Deployment status
 
-Vercel and Render are the planned hosting targets. Deployment templates and production checks are included; a live deployment is not claimed. Configure real HTTPS origins, secrets, PostgreSQL, Redis, worker and Beat services before deployment. Generate Vercel API routing with `frontend/scripts/configure-production.mjs` using the real backend origin.
+| Component | Hosting / status |
+| --- | --- |
+| Frontend | Live on Vercel with a same-origin API proxy |
+| Django API | Live on Render |
+| Database | Neon PostgreSQL |
+| Shared cache | Upstash Redis |
+| Authentication | Admin, Manager and Developer sign-in verified |
+| GitHub integration | Real push delivery and persisted activity verified for a testing repository |
+| Scheduled notifications | GitHub Actions at minutes 17 and 47; manual execution and a persisted deadline reminder verified |
+| AI insights | Gemini live generation, approved evidence citations and saved output verified |
+| Celery worker / Beat | Available for local or dedicated hosting; not running in the current cloud deployment |
+
+The scheduled workflow calls the existing notification logic directly. GitHub schedules can be delayed; notification generation is deduplicated. This deployment is suitable for demos and evaluation; full workflow testing, backup/recovery planning and monitoring remain production readiness work.
 
 GitHub webhook delivery requires a publicly reachable HTTPS backend. Gemini is optional, requires a server-side key and explicit data disclosure consent, and is subject to provider quotas and billing policies.
 

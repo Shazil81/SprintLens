@@ -138,3 +138,7 @@ npm run test:production
 Vercel and Render are the planned hosting targets. Deployment templates and production checks are included; a live deployment is not claimed. Configure real HTTPS origins, secrets, PostgreSQL, Redis, worker and Beat services before deployment. Generate Vercel API routing with `frontend/scripts/configure-production.mjs` using the real backend origin.
 
 GitHub webhook delivery requires a publicly reachable HTTPS backend. Gemini is optional, requires a server-side key and explicit data disclosure consent, and is subject to provider quotas and billing policies.
+
+## Author
+
+Created and maintained by **Mohammad Shazil Moin**.

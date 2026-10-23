@@ -1,0 +1,68 @@
+name: Production notifications
+
+on:
+  schedule:
+    # Offset from the top of the hour to reduce scheduler congestion.
+    - cron: '17,47 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-notifications
+  cancel-in-progress: false
+
+jobs:
+  notifications:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DJANGO_DEBUG: '0'
+      DJANGO_SECRET_KEY: ${{ secrets.DJANGO_SECRET_KEY }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      REDIS_URL: ${{ secrets.REDIS_URL }}
+      DATABASE_SSL_REQUIRE: '1'
+      DATABASE_CONN_MAX_AGE: '0'
+      DJANGO_ALLOWED_HOSTS: sprintlens-api.onrender.com
+      DJANGO_CSRF_TRUSTED_ORIGINS: https://sprintlens-kohl.vercel.app
+      AI_INSIGHTS_ENABLED: '0'
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Check out application
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check required configuration
+        run: |
+          python - <<'PY'
+          import os
+          missing = [key for key in ('DJANGO_SECRET_KEY', 'DATABASE_URL', 'REDIS_URL') if not os.getenv(key)]
+          if missing:
+              raise SystemExit('Missing repository secrets: ' + ', '.join(missing))
+          PY
+      - name: Install dependencies
+        run: python -m pip install -r requirements.lock.txt
+      - name: Generate reminders and digests
+        run: |
+          python - <<'PY'
+          import os
+          os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
+          import django
+          django.setup()
+          from django.db import connection
+          from django.core.management import call_command
+          # Give Neon time to wake up; keep potentially credential-bearing errors private.
+          connection.settings_dict['OPTIONS']['connect_timeout'] = 20
+          try:
+              call_command('run_notifications')
+          except Exception as error:
+              print('Notification generation failed: ' + type(error).__name__)
+              raise SystemExit(1)
+          finally:
+              connection.close()
+          PY

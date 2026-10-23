@@ -18,6 +18,7 @@ import {
 
 // Shared view definitions and pure formatters keep rendering components small.
 export type View =
+  | "Profile"
   | "Insights"
   | "Reports"
   | "Analytics"
@@ -51,11 +52,14 @@ export const nav = [
   { name: "Audit trail", icon: ShieldCheck },
 ] as const;
 // Build compact avatar labels from a person's display name.
-export const initials = (name: string) =>
-  name
-    .split(" ")
-    .map((n) => n[0])
-    .join("");
+export const initials = (name: string) => {
+  // Use at most two initials, even for names with many words or extra whitespace.
+  const words = name.trim().split(/\s+/).filter(Boolean);
+  if (!words.length) return "?";
+  const first = Array.from(words[0])[0];
+  const last = words.length > 1 ? Array.from(words[words.length - 1])[0] : "";
+  return Array.from((first + last).toLocaleUpperCase()).slice(0, 2).join("");
+};
 // Map status labels to the CSS class names used by badges and deadline markers.
 export const slug = (value: string) => value.toLowerCase().replaceAll(" ", "-");
 // Produce a local date-only key without converting midnight to another timezone.

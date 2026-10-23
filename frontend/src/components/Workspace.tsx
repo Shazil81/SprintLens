@@ -1,3 +1,4 @@
+import { ProfileView } from "./ProfileView";
 import { usePageTransition } from "../hooks/usePageTransition";
 import type { User } from "../api";
 import { useWorkspaceController } from "../hooks/useWorkspaceController";
@@ -48,6 +49,7 @@ export function Workspace({
             {view === "Projects" && <ProjectsView />}
             {view === "Overview" && <OverviewPanels />}
             {(view === "Overview" || view === "Tasks") && <TaskPanel />}
+            {view === "Profile" && <ProfileView />}
             {view === "Team" && <TeamView />}
             {view === "Planning" && <PlanningView />}
             {view === "Reviews" && <ReviewsView />}

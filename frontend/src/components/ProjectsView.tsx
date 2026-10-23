@@ -107,7 +107,7 @@ export function ProjectsView() {
                   </button>
                   <button className="text-button" onClick={() => setTeam(p)}>
                     <Users size={13} />
-                    Manage team
+                    Show Team
                   </button>
                 </div>
               )}

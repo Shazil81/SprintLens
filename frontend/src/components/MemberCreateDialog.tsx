@@ -92,7 +92,7 @@ export function MemberCreateDialog({ onClose }: { onClose: () => void }) {
         </label>
         <p className="form-note">
           This creates an account immediately. No invitation email is sent.
-          Project access is assigned separately through Manage team.
+          Project access is assigned separately through Show Team.
         </p>
         {error && (
           <div className="login-error" role="alert">

@@ -22,6 +22,11 @@
   padding: 28px;
   max-height: 90vh;
   overflow: auto;
+  overflow-wrap: anywhere;
+}
+/* Let long names, URLs and unbroken notes wrap instead of widening the dialog. */
+.task-detail-dialog :where(div, span, p, b, a, section, details, label) {
+  min-width: 0;
 }
 .detail-top {
   display: flex;
@@ -40,7 +45,7 @@
 }
 .detail-facts {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 16px;
   padding: 17px 0;
   border-block: 1px solid #ececec;

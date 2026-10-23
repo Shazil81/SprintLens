@@ -1,11 +1,12 @@
 import { useState, type FormEvent } from "react";
-import { ArrowRight, ShieldCheck, Zap, GitPullRequest, CheckCircle2, Sun } from "lucide-react";
+import { ArrowRight, ShieldCheck, Zap, GitPullRequest, CheckCircle2, Sun, Code2, BriefcaseBusiness } from "lucide-react";
 import { signIn, type User } from "../api";
 
 /** Authenticates the user and passes the server identity to App. */
 export function Login({ onLogin }: { onLogin: (user: User) => void }) {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [portal, setPortal] = useState<"Developer" | "Manager" | null>(null);
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
@@ -55,8 +56,15 @@ export function Login({ onLogin }: { onLogin: (user: User) => void }) {
       <main className="login-main">
         <form onSubmit={submit}>
           <span className="login-kicker">WELCOME BACK</span>
-          <h1>Sign in to SprintLens</h1>
-          <p>Your team’s next chapter starts here.</p>
+          <h1>{portal ? `${portal} sign in` : "Sign in to SprintLens"}</h1>
+          <p>{portal === "Developer" ? "Your tasks, feedback and growth in one place." : portal === "Manager" ? "Bring your team’s work into focus. Admin accounts can sign in here too." : "Choose your workspace to continue."}</p>
+          <div className="login-portals" aria-label="Choose your workspace">
+            {(["Developer", "Manager"] as const).map((role) => {
+              const Icon = role === "Developer" ? Code2 : BriefcaseBusiness;
+              return <button type="button" key={role} aria-pressed={portal === role} className={`login-portal ${portal === role ? "selected" : ""}`} disabled={busy} onClick={() => { setPortal(role); setError(""); }}><Icon size={22}/><b>{role}</b><small>{role === "Developer" ? "Build, deliver & grow" : "Plan, support & review"}</small></button>;
+            })}
+          </div>
+          {portal && <>
           <label>
             Username
             <input
@@ -87,6 +95,7 @@ export function Login({ onLogin }: { onLogin: (user: User) => void }) {
             {busy ? "Signing in…" : "Sign in"}
             <ArrowRight size={17} />
           </button>
+          </>}
           <div className="login-foot">
             Access is managed by your workspace administrator.
           </div>

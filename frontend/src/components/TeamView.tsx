@@ -42,13 +42,13 @@ export function TeamView() {
           No team members are visible in your current projects.
         </div>
       )}
-      <div className="row g-4">
+      <div className="team-grid">
         {members.map((member, i) => {
           const tasks = data.tasks.filter(
             (task) => task.assigneeId === member.id,
           );
           return (
-            <div className="col-md-6" key={member.id}>
+            <div className="team-grid-item" key={member.id}>
               <article className="team-card">
                 <span
                   className={`avatar large ${["green", "purple", "orange", "blue"][i % 4]}`}

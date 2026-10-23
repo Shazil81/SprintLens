@@ -22,7 +22,7 @@ export function PageHeader() {
         <p>
           {view === "Overview"
             ? "Here’s what’s happening with your team today."
-            : "Connected work. Clear ownership. Every change accounted for."}
+            : view === "Profile" ? "Your work, progress and feedback in one place." : "Connected work. Clear ownership. Every change accounted for."}
         </p>
       </div>
       <button className="button secondary" onClick={exportReport}>

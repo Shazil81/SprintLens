@@ -4,8 +4,8 @@ import {checkConfig,productionConfig} from './configure-production.mjs';
 
 test('API routing precedes SPA fallback, remains same-origin, and disables caching', () => {
   const config = productionConfig('https://sprintlens-api.onrender.com');
-  assert.equal(config.rewrites[0].source,'/api/:path*');
-  assert.equal(config.rewrites[0].destination,'https://sprintlens-api.onrender.com/api/:path*');
+  assert.equal(config.rewrites[0].source,'/api/:path(.*)');
+  assert.equal(config.rewrites[0].destination,'https://sprintlens-api.onrender.com/api/:path');
   assert.equal(config.rewrites[1].destination,'/index.html');
   assert.ok(config.headers[1].headers.some(h => h.key === 'Vercel-CDN-Cache-Control' && h.value === 'no-store'));
   assert.ok(config.headers[0].headers.some(h => h.key === 'Content-Security-Policy' && h.value.includes("connect-src 'self'")));
@@ -20,7 +20,7 @@ test('reject accidental HTTP, secret-bearing URLs, placeholders and embedded API
 
 test('custom HTTPS origins normalize one trailing slash; edited config is detected', () => {
   const config = productionConfig('https://api.sprintlens.test/');
-  assert.equal(config.rewrites[0].destination,'https://api.sprintlens.test/api/:path*');
+  assert.equal(config.rewrites[0].destination,'https://api.sprintlens.test/api/:path');
   config.rewrites.reverse();
   assert.throws(() => checkConfig(config));
 });

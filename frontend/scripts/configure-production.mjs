@@ -19,8 +19,9 @@ export function productionConfig(origin) {
   return {
     $schema:'https://openapi.vercel.sh/vercel.json',framework:'vite',
     buildCommand:'npm run build:vercel',outputDirectory:'dist',
-    rewrites:[{source:'/api/:path*',destination:`${url.origin}/api/:path*`},{source:'/:path*',destination:'/index.html'}],
-    headers:[{source:'/:path*',headers:security},{source:'/api/:path*',headers:[
+    // Capture the entire path, including Django's required trailing slash.
+    rewrites:[{source:'/api/:path(.*)',destination:`${url.origin}/api/:path`},{source:'/:path(.*)',destination:'/index.html'}],
+    headers:[{source:'/:path(.*)',headers:security},{source:'/api/:path(.*)',headers:[
       {key:'Cache-Control',value:'private, no-store, max-age=0'},
       {key:'CDN-Cache-Control',value:'no-store'},
       {key:'Vercel-CDN-Cache-Control',value:'no-store'},
@@ -30,8 +31,8 @@ export function productionConfig(origin) {
 
 export function checkConfig(config) {
   const destination = config?.rewrites?.[0]?.destination;
-  if(typeof destination !== 'string' || !destination.endsWith('/api/:path*')) throw new Error('Missing the production /api rewrite.');
-  const expected = productionConfig(destination.slice(0,-'/api/:path*'.length));
+  if(typeof destination !== 'string' || !destination.endsWith('/api/:path')) throw new Error('Missing the production /api rewrite.');
+  const expected = productionConfig(destination.slice(0,-'/api/:path'.length));
   if(JSON.stringify(config) !== JSON.stringify(expected)) throw new Error('Vercel routing differs from the reviewed template. Regenerate it with the real backend origin.');
 }
 

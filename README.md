@@ -67,17 +67,29 @@ flowchart TB
     Actions[GitHub Actions - every 30 minutes] --> Command[Django run_notifications command]
     Command -->|Persist reminders and digests| DB
     API -->|Production shared cache| Redis[(Upstash Redis)]
-    subgraph LocalJobs[Local / optional dedicated worker deployment]
-        Beat[Celery Beat] --> Broker[(Redis broker)]
-        Broker --> Worker[Celery worker]
-    end
     GitHub[GitHub repositories] -->|Signed, deduplicated webhooks| API
     Logic -->|Explicitly approved project snapshot| Gemini[Google Gemini API]
     Gemini -->|Reviewable insight drafts| Logic
     Logic --> Exports[Authenticated PDF / CSV / JSON]
 ```
 
-The backend is API-only. React owns application HTML, styling and interactions. PostgreSQL stores business records; Redis supports background jobs and production shared caching. Local development uses Django's in-memory cache. GitHub activity supplies evidence rather than an automatic performance score.
+The diagram above describes the live cloud deployment. Scheduled cloud jobs use GitHub Actions; Celery runs in the local Docker stack below.
+
+```mermaid
+flowchart LR
+    Browser[Browser - localhost:8080] --> Nginx
+    subgraph Docker[Local Docker Compose network]
+        Nginx[Nginx - React production build] -->|Same-origin /api/ proxy| Django[Django REST Framework + Gunicorn]
+        Django -->|Cache - Redis database 1| Redis[(Redis)]
+        Beat[Celery Beat - persistent schedule] -->|Scheduled jobs - database 0| Redis
+        Redis -->|Queued jobs| Worker[Celery worker]
+    end
+    Django -->|host.docker.internal| PG[(Device PostgreSQL - outside Docker)]
+    Worker -->|Read work and save notifications| PG
+    Django -->|Approved snapshots only| Gemini[Google Gemini API - optional]
+```
+
+The backend is API-only. React owns application HTML, styling and interactions. PostgreSQL stores business records. Docker uses Redis for caching and Celery jobs; native local development defaults to in-memory caching unless `CACHE_URL` is supplied. GitHub activity supplies evidence rather than an automatic performance score.
 
 ## Source layout
 
@@ -96,9 +108,40 @@ backend/
   scripts/              Production build, release and start scripts
 deploy/                 Render deployment template
 docs/architecture.md    Concise architecture reference
+compose.yaml            Complete local container stack; host PostgreSQL
+compose.jobs.yaml       Alternative Redis / worker-only stack
 ```
 
 ## Local development
+
+### Docker Compose
+
+Prerequisites: Docker Desktop with the Linux engine running, and your device's PostgreSQL service running and reachable from Docker. PostgreSQL is not containerized or copied to Neon by this setup.
+
+From the repository root, copy `.env.docker.example` to `.env.docker.local`, set a private Django secret and your local PostgreSQL connection details. Use `host.docker.internal` as the database host and URL-encode special characters in credentials. The private file is ignored by Git and must never be committed. Optional Gemini settings are also server-side in this file.
+
+```powershell
+if (!(Test-Path .env.docker.local)) { Copy-Item .env.docker.example .env.docker.local }
+# Fill in .env.docker.local before starting; preserve it if already configured.
+docker compose up --build -d
+docker compose ps
+docker compose logs -f
+```
+
+Open [localhost:8080](http://localhost:8080). Nginx serves the React build and proxies API requests to Django. Backend startup applies migrations to the configured local database before the dependent services start. Existing database accounts keep their passwords; a fresh database requires administrator account setup.
+
+```powershell
+# Stop the stack; retain Redis and Beat volumes
+docker compose down
+# Rebuild after code changes
+docker compose up --build -d
+# Check worker connectivity
+docker compose exec worker celery -A config inspect ping
+```
+
+Only the frontend port is exposed, bound to localhost. Redis data and Beat schedule state use named volumes. Run one Beat scheduler; stop any native local worker/Beat processes when using this stack. `compose.jobs.yaml` is an alternative partial setup and should not run alongside the complete Compose stack. Local HTTP mode uses `DJANGO_DEBUG=1`; this Compose configuration is not an Internet-facing production deployment. Vercel/Render continue to use their existing deployment configuration.
+
+### Native processes
 
 Prerequisites: Node.js/npm, Python with the backend dependencies, PostgreSQL, and Redis when running background jobs.
 

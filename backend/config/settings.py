@@ -53,7 +53,7 @@ REST_FRAMEWORK = {
     # Account throttles use user IDs; anonymous requests never trust arbitrary forwarded IPs.
     'NUM_PROXIES': 0,
 }
-CACHES = {'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache', 'LOCATION': 'sprintlens-local'}} if DEBUG else {
+CACHES = {'default': {'BACKEND': 'django.core.cache.backends.locmem.LocMemCache', 'LOCATION': 'sprintlens-local'}} if DEBUG and not os.getenv('CACHE_URL') else {
     'default': {'BACKEND': 'django.core.cache.backends.redis.RedisCache', 'LOCATION': runtime.cache_url,
                 'KEY_PREFIX': 'sprintlens', 'TIMEOUT': 300,
                 'OPTIONS': {'socket_connect_timeout': 1, 'socket_timeout': 1}}}

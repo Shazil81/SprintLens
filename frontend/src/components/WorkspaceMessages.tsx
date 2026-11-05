@@ -13,8 +13,7 @@ export function WorkspaceMessages() {
             Tasks are saved by Django. Your account controls project access, and
             every task change records an audit event. Planning, private reviews,
             growth goals and notifications are available. GitHub activity
-            requires a configured repository webhook. AI insights are a later
-            milestone.
+            requires a configured repository webhook. AI insights require a configured provider and your approval before a project snapshot is sent.
           </p>
         </div>
       )}
@@ -25,7 +24,7 @@ export function WorkspaceMessages() {
       )}
       {notice && (
         <div className="notice" role="status">
-          <CheckCircle2 size={17} />
+          <span aria-hidden="true">•</span>
           {notice}
           <button
             aria-label="Dismiss notification"

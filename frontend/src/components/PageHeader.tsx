@@ -6,7 +6,7 @@ export function PageHeader() {
   return (
     <div className="page-heading">
       <div>
-        <div className="eyebrow">
+        <div className="page-context">
           {new Date().toLocaleDateString("en-US", {
             weekday: "long",
             month: "long",

@@ -42,7 +42,7 @@
 }
 .field-help {
   font-size: 10px;
-  color: #999;
+  color: var(--color-muted);
   line-height: 1.7;
 }
 .member-selection {
@@ -78,7 +78,7 @@
 .member-option small {
   display: block;
   font-size: 10px;
-  color: #999;
+  color: var(--color-muted);
   margin-top: 5px;
 }
 .member-card-actions {
@@ -87,7 +87,7 @@
   gap: 12px;
 }
 .you-label {
-  font-family: "DM Sans";
+  font-family: var(--font-body);
   font-size: 9px;
   font-weight: 400;
   border: 1px solid #e7e7e7;
@@ -95,7 +95,7 @@
   padding: 3px 6px;
   vertical-align: middle;
   margin-left: 9px;
-  color: #999;
+  color: var(--color-muted);
 }
 .management-dialog h2 {
   font-size: 21px;

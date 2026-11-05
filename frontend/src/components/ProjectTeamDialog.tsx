@@ -43,8 +43,8 @@ export function ProjectTeamDialog({
       <form onSubmit={submit}>
         <div className="section-title">
           <div>
-            <div className="eyebrow">{project.name}</div>
-            <h2 id="project-team-heading">Manage project team</h2>
+            <p>{project.name}</p>
+            <h2 id="project-team-heading">Project team</h2>
           </div>
           <button
             type="button"
@@ -56,7 +56,7 @@ export function ProjectTeamDialog({
           </button>
         </div>
         <p className="form-note">
-          Selected workspace members can access this project. Reassign open work
+          You can update the team below. Selected workspace members can access this project. Reassign open work
           and resolve blockers before removing a member.
         </p>
         <div className="member-selection">

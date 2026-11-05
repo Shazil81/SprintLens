@@ -1,5 +1,6 @@
 from django.db import transaction
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Value
+from django.db.models.functions import Concat
 from rest_framework.generics import get_object_or_404
 from django.utils import timezone
 from rest_framework import mixins, serializers, viewsets
@@ -13,6 +14,12 @@ from .serializers import AuditSerializer, MemberSerializer, ProjectSerializer, T
 from .task_activity import TaskActivityMixin
 from .planning import TaskPlanningMixin
 from .team_management import ProjectManagementViewSet as ProjectViewSet, TeamManagementViewSet as MemberViewSet
+from rest_framework.pagination import PageNumberPagination
+
+
+class WorkspacePagination(PageNumberPagination):
+    page_size_query_param = 'page_size'
+    max_page_size = 100
 
 
 def task_snapshot(task):
@@ -21,10 +28,28 @@ def task_snapshot(task):
 
 class TaskViewSet(TaskPlanningMixin, TaskActivityMixin, mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.CreateModelMixin, viewsets.GenericViewSet):
     serializer_class = TaskSerializer
+    pagination_class = WorkspacePagination
 
     def get_queryset(self):
         member = current_membership(self.request)
         qs = Task.objects.filter(project__in=accessible_projects(member)).select_related('project', 'assignee__user')
+        if self.action == 'list':
+            params = self.request.query_params
+            if params.get('mine') == '1':
+                qs = qs.filter(assignee=member)
+            for param, field in [('project', 'project_id'), ('assignee', 'assignee_id'), ('status', 'status'), ('due', 'due')]:
+                value = params.get(param)
+                if value:
+                    from django.core.exceptions import ValidationError
+                    try:
+                        qs = qs.filter(**{field: value})
+                    except (ValueError, ValidationError):
+                        raise serializers.ValidationError({param: 'Invalid filter value.'}) from None
+            query = params.get('search', '').strip()[:150]
+            if query:
+                qs = qs.annotate(assignee_full_name=Concat('assignee__user__first_name', Value(' '), 'assignee__user__last_name')).filter(Q(assignee_full_name__icontains=query) | Q(title__icontains=query) | Q(project__name__icontains=query) |
+                               Q(assignee__user__first_name__icontains=query) | Q(assignee__user__last_name__icontains=query) |
+                               Q(project__code__icontains=query) | Q(id__icontains=query.split('-')[-1]))
         # Developers can see project tasks but can only mutate their own assignments.
         return qs
 
@@ -107,6 +132,7 @@ class TaskViewSet(TaskPlanningMixin, TaskActivityMixin, mixins.ListModelMixin, m
 
 class AuditViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
     serializer_class = AuditSerializer
+    pagination_class = WorkspacePagination
 
     def get_queryset(self):
         member = current_membership(self.request)

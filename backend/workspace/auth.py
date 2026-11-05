@@ -33,6 +33,9 @@ def sign_in(request):
     try:
         data = json.loads(request.body)
         username, password = data.get('username', ''), data.get('password', '')
+        portal = data.get('portal')
+        if portal is not None and portal not in ('Developer', 'Manager'):
+            raise ValueError
         if not isinstance(username, str) or not isinstance(password, str) or len(username) > 150 or len(password) > 1024:
             raise ValueError
     except (ValueError, AttributeError, UnicodeDecodeError):
@@ -51,9 +54,13 @@ def sign_in(request):
     user = authenticate(request, username=username, password=password)
     if not user or not Membership.objects.filter(user=user).exists():
         return JsonResponse({'detail': 'Invalid credentials or no workspace access.'}, status=400)
+    user_identity = identity(user)
+    expected = 'Developer' if user_identity['role'] == 'Developer' else 'Manager'
+    if portal is not None and portal != expected:
+        return JsonResponse({'detail': f'This account uses the {expected} option. Select it and sign in again.'}, status=400)
     cache.delete(key)
     login(request, user)
-    return JsonResponse({'user': identity(user), 'csrfToken': get_token(request)})
+    return JsonResponse({'user': user_identity, 'csrfToken': get_token(request)})
 
 
 @never_cache

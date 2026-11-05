@@ -8,7 +8,7 @@
     "build": "tsc --noEmit && vite build",
     "check:production": "node scripts/configure-production.mjs --check",
     "build:vercel": "npm run check:production && npm run build",
-    "test:production": "node --test scripts/configure-production.test.mjs",
+    "test:production": "node --test scripts/configure-production.test.mjs scripts/view.test.mjs",
     "preview": "vite preview --host 127.0.0.1"
   },
   "dependencies": {

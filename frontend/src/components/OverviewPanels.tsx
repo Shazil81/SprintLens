@@ -1,3 +1,7 @@
+import { useFeatureData } from "../hooks/useFeatureData";
+import { usePagedData } from "../hooks/usePagedData";
+import type { ApiTask } from "../api";
+import type { Audit } from "../data";
 import {
   Clock3,
   ArrowUpRight,
@@ -9,8 +13,10 @@ import { dateKey, slug, initials } from "../utils/workspace";
 import { useWorkspace } from "../hooks/useWorkspace";
 /** Shows the next seven days of deadlines and recent server audit activity. */
 export function OverviewPanels() {
-  const { week, selectedDay, setSelectedDay, scoped, go, setQuery, data } =
+  const { week, selectedDay, setSelectedDay, user, go, setQuery, revision, setDetailTaskId } =
     useWorkspace();
+  const deadlines = usePagedData<ApiTask>(`tasks/?due=${selectedDay}&page_size=100${user.role === "Developer" ? "&mine=1" : ""}`, revision);
+  const activity = usePagedData<Audit>("audit-events/?page_size=3", revision);
   return (
     <div className="lower-grid">
       <section className="schedule-panel">
@@ -36,15 +42,12 @@ export function OverviewPanels() {
           ))}
         </div>
         <div className="deadline-list">
-          {scoped
-            .filter((t) => t.due === selectedDay)
-            .map((t) => (
+          {deadlines.page?.results.map((t) => (
               <button
                 key={t.id}
                 className="deadline"
                 onClick={() => {
-                  go("Tasks");
-                  setQuery(t.id);
+                  setDetailTaskId(t.id);
                 }}
               >
                 <span className={"deadline-line " + slug(t.status)} />
@@ -54,11 +57,14 @@ export function OverviewPanels() {
                     {t.project} · {t.status}
                   </small>
                 </div>
-                <span className="avatar small">{initials(t.assignee)}</span>
+                <span className="avatar small">{initials(t.assignee_name)}</span>
                 <ArrowUpRight size={16} />
               </button>
             ))}
-          {!scoped.some((t) => t.due === selectedDay) && (
+          {deadlines.loading && <p role="status" className="detail-empty">Loading deadlines…</p>}
+          {deadlines.error && <p role="alert">{deadlines.error}</p>}
+          {Boolean(deadlines.page?.next) && <button className="text-button" onClick={() => go("Tasks")}>See all assignments in Tasks</button>}
+          {!deadlines.loading && !deadlines.error && !deadlines.page?.count && (
             <div className="empty">
               No deadlines on this day.
               <br />
@@ -77,7 +83,7 @@ export function OverviewPanels() {
             View all <ArrowRight size={15} />
           </button>
         </div>
-        {data.audit.slice(0, 3).map((event) => (
+        {activity.page?.results.map((event) => (
           <div className="activity-entry" key={event.id}>
             <span className="activity-check">
               <Check size={14} />
@@ -94,6 +100,9 @@ export function OverviewPanels() {
             </div>
           </div>
         ))}
+        {activity.loading && <p role="status" className="detail-empty">Loading activity…</p>}
+        {activity.error && <p role="alert">{activity.error}</p>}
+        {!activity.loading && !activity.error && !activity.page?.count && <p className="detail-empty">No recorded activity yet.</p>}
         <div className="activity-note">
           <ShieldCheck size={16} />
           <span>Clear ownership. A record of every change.</span>

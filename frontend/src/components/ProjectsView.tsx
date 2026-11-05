@@ -7,7 +7,7 @@ import { ArrowUpRight, Clock3 } from "lucide-react";
 import { useWorkspace } from "../hooks/useWorkspace";
 /** Renders project progress cards and links each card to its task filter. */
 export function ProjectsView() {
-  const { projects, scoped, go, setProjectFilter, user, loading } =
+  const { projects, go, setProjectFilter, user, loading } =
     useWorkspace();
   const [editor, setEditor] = useState<{ project?: Project } | null>(null);
   const [team, setTeam] = useState<Project | null>(null);
@@ -49,12 +49,11 @@ export function ProjectsView() {
       )}
       <div className="row g-3">
         {projects.map((p) => {
-          const tasks = scoped.filter((t) => t.projectId === p.id);
-          const completed = tasks.filter((t) => t.status === "Done").length;
-          const percent = tasks.length
-            ? Math.round((completed / tasks.length) * 100)
+          const completed = p.task_completed;
+          const percent = p.task_total
+            ? Math.round((completed / p.task_total) * 100)
             : 0;
-          const risk = tasks.some((t) => t.status === "Blocked");
+          const risk = p.task_blocked > 0;
           return (
             <div className="col-md-4" key={p.code}>
               <button
@@ -77,7 +76,7 @@ export function ProjectsView() {
                 <p>{p.description}</p>
                 <div className="progress-label">
                   <span>
-                    {completed} of {tasks.length} tasks complete
+                    {completed} of {p.task_total} tasks complete
                   </span>
                   <b>{percent}%</b>
                 </div>

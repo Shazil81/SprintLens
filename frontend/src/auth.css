@@ -20,12 +20,6 @@
   padding: 30px;
   text-align: center;
 }
-.login-shell {
-  min-height: 100vh;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  background: white;
-}
 .login-story {
   background: #edf2ff;
   padding: 50px 65px;
@@ -94,7 +88,7 @@
 }
 .login-main form > p {
   font-size: 13px;
-  color: #999;
+  color: var(--color-muted);
   margin: 12px 0 34px;
 }
 .login-main label {
@@ -125,7 +119,7 @@
 }
 .login-foot {
   font-size: 11px;
-  color: #999;
+  color: var(--color-muted);
   margin-top: 25px;
   line-height: 1.8;
 }
@@ -169,7 +163,7 @@ dialog {
   }
   .brand:after {
     content: "SL";
-    font-family: "DM Sans";
+    font-family: var(--font-body);
     font-size: 19px;
     letter-spacing: -1px;
   }

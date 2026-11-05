@@ -11,6 +11,9 @@ class StrictSerializer(serializers.ModelSerializer):
 
 
 class MemberSerializer(serializers.ModelSerializer):
+    task_open = serializers.IntegerField(read_only=True, default=0)
+    task_review = serializers.IntegerField(read_only=True, default=0)
+    task_blocked = serializers.IntegerField(read_only=True, default=0)
     name = serializers.SerializerMethodField()
     user_id = serializers.IntegerField(read_only=True)
 
@@ -19,10 +22,13 @@ class MemberSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Membership
-        fields = ['id', 'user_id', 'name', 'role']
+        fields = ['id', 'user_id', 'name', 'role', 'task_open', 'task_review', 'task_blocked']
 
 
 class ProjectSerializer(StrictSerializer):
+    task_total = serializers.IntegerField(read_only=True, default=0)
+    task_completed = serializers.IntegerField(read_only=True, default=0)
+    task_blocked = serializers.IntegerField(read_only=True, default=0)
     member_ids = serializers.SerializerMethodField()
     reviewer_ids = serializers.SerializerMethodField()
     version = serializers.IntegerField(min_value=1, required=False)
@@ -42,7 +48,7 @@ class ProjectSerializer(StrictSerializer):
 
     class Meta:
         model = Project
-        fields = ['id', 'name', 'code', 'description', 'due', 'color', 'member_ids', 'reviewer_ids', 'version']
+        fields = ['id', 'name', 'code', 'description', 'due', 'color', 'member_ids', 'reviewer_ids', 'version', 'task_total', 'task_completed', 'task_blocked']
         read_only_fields = ['id']
 
 

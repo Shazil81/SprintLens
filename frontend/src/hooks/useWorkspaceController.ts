@@ -1,3 +1,4 @@
+import { useView } from "./useView";
 import { closeDialogAnimated } from "../utils/dialogMotion";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -22,6 +23,10 @@ export function useWorkspaceController(user: User, onLogout: () => void) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [members, setMembers] = useState<Member[]>([]);
   const [detailTaskId, setDetailTaskId] = useState<string | null>(null);
+  const [view, setView] = useView();
+  const needsTasks = ["Planning", "Evaluation"].includes(view) || Boolean(detailTaskId);
+  const [revision, setRevision] = useState(0);
+  const [summary, setSummary] = useState<{ tasks: number; by_status: Record<string, number> }>({ tasks: 0, by_status: {} });
   const people = members.map((m) => m.name);
   const role = user.role === "Admin" ? "Manager" : user.role;
   const [busy, setBusy] = useState(false);
@@ -34,16 +39,19 @@ export function useWorkspaceController(user: User, onLogout: () => void) {
       .find((p) => String(p.id) === formProject)
       ?.member_ids.includes(m.id),
   );
-  // Fetch independent resources together, then map API IDs to display values.
+  const generation = useRef(0);
+  // A failed panel must not discard successful, independent resources.
   async function reload() {
-    const [tasks, audit, projectList, memberList] = await Promise.all([
-      listAll<ApiTask>("tasks/"),
-      listAll<Audit>("audit-events/"),
+    const current = ++generation.current;
+    const [tasks, dashboard, projectList, memberList] = await Promise.allSettled([
+      needsTasks ? listAll<ApiTask>("tasks/") : Promise.resolve([]),
+      request<{ tasks: number; by_status: Record<string, number> }>("dashboard/"),
       listAll<Project>("projects/"),
       listAll<Member>("members/"),
     ]);
-    setData({
-      tasks: tasks.map((t) => ({
+    if (current !== generation.current) return;
+    if (tasks.status === "fulfilled") setData({
+      tasks: tasks.value.map((t) => ({
         ...t,
         apiId: t.id,
         id: t.code,
@@ -53,16 +61,20 @@ export function useWorkspaceController(user: User, onLogout: () => void) {
         assignee: t.assignee_name,
         status: t.status as Status,
       })),
-      audit,
+      audit: [],
     });
-    setProjects(projectList);
-    setMembers(memberList);
+    if (dashboard.status === "fulfilled") setSummary(dashboard.value);
+    setRevision((value) => value + 1);
+    if (projectList.status === "fulfilled") setProjects(projectList.value);
+    if (memberList.status === "fulfilled") setMembers(memberList.value);
+    const failures = [tasks, dashboard, projectList, memberList].filter((result) => result.status === "rejected");
+    if (failures.length) throw new Error("Some workspace data could not be refreshed. Use Refresh to retry.");
   }
   useEffect(() => {
     reload()
       .catch((e) => setNotice(e.message))
       .finally(() => setLoading(false));
-  }, []);
+  }, [needsTasks]);
   // Refresh all panels together when the user asks for the latest server state.
   async function refresh() {
     setLoading(true);
@@ -92,7 +104,6 @@ export function useWorkspaceController(user: User, onLogout: () => void) {
     setFormError("");
     dialog.current?.showModal();
   }
-  const [view, setView] = useState<View>("Overview");
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("All statuses");
   const [projectFilter, setProjectFilter] = useState("All projects");
@@ -106,22 +117,6 @@ export function useWorkspaceController(user: User, onLogout: () => void) {
   });
   const dialog = useRef<HTMLDialogElement>(null);
   const creator = useRef<HTMLButtonElement>(null);
-  // These filters control display; authorization is still enforced by Django.
-  const scoped = data.tasks.filter(
-    (t) => role === "Manager" || t.assigneeId === user.membership_id,
-  );
-  const visible = scoped.filter(
-    (t) =>
-      `${t.id} ${t.title} ${t.project} ${t.assignee}`
-        .toLowerCase()
-        .includes(query.toLowerCase()) &&
-      (filter === "All statuses" || t.status === filter) &&
-      (projectFilter === "All projects" ||
-        String(t.projectId) === projectFilter),
-  );
-  const done = scoped.filter((t) => t.status === "Done").length;
-  const blocked = scoped.filter((t) => t.status === "Blocked");
-  const review = scoped.filter((t) => t.status === "In review").length;
   // Reset filters when switching sections so old searches do not hide new content.
   function go(next: View) {
     setView(next);
@@ -220,11 +215,8 @@ export function useWorkspaceController(user: User, onLogout: () => void) {
     week,
     dialog,
     creator,
-    scoped,
-    visible,
-    done,
-    blocked,
-    review,
+    summary,
+    revision,
     go,
     changeStatus,
     createTask,

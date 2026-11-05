@@ -58,7 +58,7 @@
 }
 .detail-facts small {
   font-size: 10px;
-  color: #999;
+  color: var(--color-muted);
 }
 .detail-facts b {
   font-size: 11px;
@@ -91,7 +91,7 @@
   display: flex;
   gap: 9px;
   align-items: center;
-  font-family: "DM Sans", sans-serif;
+  font-family: var(--font-body);
   font-weight: 550;
 }
 .detail-section h3 svg {
@@ -168,7 +168,7 @@
 }
 .discussion-meta time {
   font-size: 9px;
-  color: #999;
+  color: var(--color-muted);
   margin-left: auto;
 }
 .note-kind {

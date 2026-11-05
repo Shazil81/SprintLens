@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 from django.db import IntegrityError, transaction
+from django.db.models import Count, Q
 from rest_framework import mixins, serializers, viewsets
 from rest_framework.decorators import action
 from rest_framework.exceptions import PermissionDenied
@@ -33,7 +34,13 @@ class ProjectManagementViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin,
     serializer_class = ProjectSerializer
 
     def get_queryset(self):
-        return accessible_projects(current_membership(self.request)).prefetch_related('memberships')
+        qs = accessible_projects(current_membership(self.request)).prefetch_related('memberships')
+        if self.action not in ('list', 'retrieve'):
+            return qs
+        return qs.annotate(
+            task_total=Count('tasks'),
+            task_completed=Count('tasks', filter=Q(tasks__status='Done')),
+            task_blocked=Count('tasks', filter=Q(tasks__status='Blocked'))).order_by('id')
 
     @transaction.atomic
     def perform_create(self, serializer):
@@ -154,7 +161,13 @@ class TeamManagementViewSet(mixins.ListModelMixin, mixins.CreateModelMixin, view
         qs = Membership.objects.filter(organization=member.organization, user__is_active=True).select_related('user').order_by('id')
         if member.role == Membership.Role.DEVELOPER:
             qs = qs.filter(projects__project__in=accessible_projects(member)).distinct()
-        return qs
+        if self.action != 'list':
+            return qs
+        visible = Q(tasks__project__in=accessible_projects(member))
+        return qs.annotate(
+            task_open=Count('tasks', filter=visible & ~Q(tasks__status='Done'), distinct=True),
+            task_review=Count('tasks', filter=visible & Q(tasks__status='In review'), distinct=True),
+            task_blocked=Count('tasks', filter=visible & Q(tasks__status='Blocked'), distinct=True))
 
     @transaction.atomic
     def create(self, request):

@@ -7,12 +7,18 @@ export type User = {
   organization: { id: number; name: string };
 };
 export type Member = {
+  task_open: number;
+  task_review: number;
+  task_blocked: number;
   id: number;
   user_id: number;
   name: string;
   role: User["role"];
 };
 export type Project = {
+  task_total: number;
+  task_completed: number;
+  task_blocked: number;
   id: number;
   name: string;
   code: string;
@@ -212,12 +218,12 @@ export async function request<T>(
   return value as T;
 }
 export const session = () => request<{ user: User | null }>("auth/session/");
-export const signIn = async (username: string, password: string) => {
+export const signIn = async (username: string, password: string, portal?: "Developer" | "Manager") => {
   // Refresh the CSRF cookie before authentication after long idle periods or cookie changes.
   await session();
   return request<{ user: User }>("auth/login/", {
     method: "POST",
-    body: JSON.stringify({ username, password }),
+    body: JSON.stringify({ username, password, portal }),
   });
 };
 export const signOut = () =>

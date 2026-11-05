@@ -3,18 +3,13 @@
   color: #242424;
   background: #fafafa;
   font-size: 14px;
-  font-family: "DM Sans", sans-serif;
+  font-family: var(--font-body);
 }
 body {
   background: #fafafa;
 }
-.app-shell {
-  max-width: 1740px;
-  margin: auto;
-  background: #fff;
-}
 .sidebar {
-  background: #fff;
+  background: var(--color-surface);
   color: #606060;
   border-right: 1px solid #ededed;
   width: 245px;
@@ -123,10 +118,6 @@ nav button.active {
 .online {
   background: #8ee0a4;
 }
-.avatar {
-  background: #eeeaf6;
-  color: #68597e;
-}
 .main-shell {
   margin-left: 245px;
 }
@@ -190,7 +181,7 @@ main {
   margin-bottom: 10px;
 }
 h1 {
-  font-family: "DM Sans", sans-serif;
+  font-family: var(--font-body);
   font-size: 35px;
   font-weight: 600;
   letter-spacing: -1.3px;
@@ -257,7 +248,7 @@ h1 {
   margin-bottom: 17px;
 }
 .section-title h2 {
-  font-family: "DM Sans";
+  font-family: var(--font-body);
   font-size: 18px;
   font-weight: 550;
   color: #222;
@@ -265,25 +256,24 @@ h1 {
 }
 .section-title p {
   font-size: 11px;
-  color: #999;
+  color: var(--color-muted);
 }
 .filters {
   padding: 0 23px 18px;
 }
-.filters select,
 .search {
   border-color: #e7e7e7;
   border-radius: 6px;
   color: #707070;
   font-size: 11px;
-  background: #fff;
+  background: var(--color-surface);
 }
 .search input {
   font-size: 11px;
   color: #333;
 }
 .search input::placeholder {
-  color: #999;
+  color: var(--color-muted);
 }
 .search:focus-within {
   outline-color: #b5c9fb;
@@ -320,13 +310,6 @@ td strong {
 .priority {
   display: none;
 }
-.status {
-  border-radius: 20px;
-  font-size: 10px;
-  padding: 4px 9px;
-  min-width: 99px;
-  color: #252525;
-}
 .in-progress {
   background: #b0efb8;
   color: #244c2b;
@@ -349,7 +332,7 @@ td strong {
 }
 .table-footer {
   padding: 13px 23px;
-  color: #999;
+  color: var(--color-muted);
   font-size: 10px;
 }
 .lower-grid {
@@ -363,7 +346,7 @@ td strong {
   border: 1px solid #e2e2e2;
   border-radius: 12px;
   overflow: hidden;
-  background: #fff;
+  background: var(--color-surface);
   min-width: 0;
 }
 .lower-grid .section-title {
@@ -382,7 +365,7 @@ td strong {
 }
 .panel-caption {
   font-size: 10px;
-  color: #999;
+  color: var(--color-muted);
 }
 .calendar-week {
   display: flex;
@@ -446,11 +429,11 @@ td strong {
 .deadline small {
   display: block;
   font-size: 10px;
-  color: #999;
+  color: var(--color-muted);
   margin-top: 6px;
 }
 .deadline > svg {
-  color: #999;
+  color: var(--color-muted);
 }
 .activity-entry {
   display: flex;
@@ -466,7 +449,7 @@ td strong {
 }
 .activity-entry p {
   font-size: 10px;
-  color: #999;
+  color: var(--color-muted);
   margin-top: 7px;
 }
 .activity-check {
@@ -489,11 +472,11 @@ td strong {
   background: #fafafa;
   border-radius: 6px;
   font-size: 10px;
-  color: #999;
+  color: var(--color-muted);
 }
 .empty {
   font-size: 12px;
-  color: #999;
+  color: var(--color-muted);
   line-height: 1.9;
 }
 .text-button {
@@ -526,15 +509,10 @@ td strong {
 .progress-label,
 .project-footer {
   font-size: 11px;
-  color: #888;
+  color: var(--color-muted);
 }
 .badge {
   font-size: 9px;
-}
-.project-symbol {
-  width: 40px;
-  height: 40px;
-  font-size: 12px;
 }
 .page-footer {
   color: #aaa;
@@ -568,7 +546,7 @@ td strong {
 }
 .audit-item p,
 .team-card > p {
-  color: #888;
+  color: var(--color-muted);
 }
 .team-metrics b {
   color: #333;
@@ -577,7 +555,7 @@ td strong {
   color: #222;
 }
 .team-metrics span {
-  color: #888;
+  color: var(--color-muted);
 }
 dialog {
   border-color: #e2e2e2;
@@ -597,7 +575,7 @@ a:focus-visible {
   outline-color: #2e64e7;
 }
 .form-note {
-  color: #888;
+  color: var(--color-muted);
 }
 @media (min-width: 1500px) {
   main {

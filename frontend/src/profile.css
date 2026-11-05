@@ -4,14 +4,14 @@
 .profile-trigger:focus-visible { outline: 3px solid #1467e8; outline-offset: 3px; }
 .workspace-navbar .header-person.profile-trigger { display: flex; }
 .profile-page { display: grid; grid-template-columns: 270px minmax(0,1fr); gap: 24px; align-items: start; color: #202b3e; }
-.profile-identity,.profile-panel { background: white; border: 1px solid #e4e9f1; border-radius: 20px; overflow: hidden; }
+.profile-identity,.profile-panel { background: white; border: 1px solid var(--color-line); border-radius: 20px; overflow: hidden; }
 .profile-cover { height: 120px; background: #e8efff; color: #47699c; padding: 24px; display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
 .profile-cover span { font-size: 10px; letter-spacing: 1.6px; line-height: 1.7; max-width: 140px; }
 .profile-identity-body { padding: 0 24px 24px; }
 .profile-avatar { margin-top: -35px; position: relative; width: 72px; height: 72px; border: 5px solid white; background: #2769d7; color: white; display: grid; place-items: center; border-radius: 22px; font-size: 24px; font-weight: 600; }
 .profile-identity h2 { margin: 18px 0 10px; font-size: 24px; }
 .profile-role { display: inline-block; background: #edf4ff; color: #245ba9; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; }
-.profile-identity p,.profile-section-heading p,.profile-feedback p { color: #627086; font-size: 13px; line-height: 1.6; }
+.profile-identity p,.profile-section-heading p,.profile-feedback p { color: var(--color-muted); font-size: 13px; line-height: 1.6; }
 .profile-identity p { margin: 18px 0 24px; }
 .profile-identity dl { margin: 0; border-top: 1px solid #edf0f5; }
 .profile-identity dl div { padding-top: 19px; }
@@ -22,7 +22,7 @@
 .profile-section-heading { display: flex; justify-content: space-between; align-items: center; gap: 16px; margin-bottom: 18px; }
 .profile-section-heading h2 { font-size: 20px; margin: 5px 0; }
 .profile-section-heading p { margin: 4px 0 0; }
-.profile-scope { font-size: 12px; color: #65748b; }
+.profile-scope { font-size: 12px; color: var(--color-muted); }
 .profile-metrics { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; }
 .profile-metric { border-radius: 17px; padding: 20px; border: 1px solid #dce6f7; background: #edf4ff; }
 .profile-metric.violet { background: #f2efff; border-color: #e6dff9; }.profile-metric.green { background: #edf8f2; border-color: #d8eade; }
@@ -37,7 +37,7 @@
 .profile-task-due { font-size: 11px; white-space: nowrap; color: #617087; }.profile-task .status { white-space: nowrap; font-size: 11px; }
 .profile-delivery { display: grid; grid-template-columns: 1fr auto; gap: 30px; background: #f7f9fc; border-radius: 14px; padding: 18px; }.profile-delivery b { font-size: 12px; }.profile-delivery strong { float: right; font-size: 16px; }.profile-delivery small { color: #69788d; font-size: 11px; }
 .profile-progress { height: 7px; background: #e1e8f3; border-radius: 10px; margin: 12px 0 8px; overflow: hidden; }.profile-progress span { display: block; height: 100%; background: #3377df; border-radius: inherit; }
-.profile-context { display: flex; gap: 24px; align-items: center; font-size: 11px; color: #65748b; }.profile-context b { display: block; font-size: 22px; color: #28374c; margin-bottom: 6px; }
+.profile-context { display: flex; gap: 24px; align-items: center; font-size: 11px; color: var(--color-muted); }.profile-context b { display: block; font-size: 22px; color: #28374c; margin-bottom: 6px; }
 .profile-feedback { margin-top: 20px; }.profile-feedback h3 { font-size: 15px; margin: 10px 0; }
 @media(max-width:1000px) { .profile-page { grid-template-columns: 220px minmax(0,1fr); gap: 16px; }.profile-metric { padding: 15px; }.profile-task-due { display: none; } }
 @media(max-width:760px) { .profile-page { grid-template-columns: 1fr; }.profile-identity dl { display: flex; gap: 25px; flex-wrap: wrap; }.profile-cover { height: 90px; }.profile-metrics { gap: 8px; }.profile-metric { padding: 13px; }.profile-panel { padding: 16px; }.profile-delivery { grid-template-columns: 1fr; gap: 16px; }.profile-scope { display: none; }.profile-section-heading { flex-wrap: wrap; }.profile-task-marker { display: none; } }

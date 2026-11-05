@@ -5,10 +5,9 @@ import { useWorkspace } from "../hooks/useWorkspace";
 import type { Member } from "../api";
 import { MemberCreateDialog } from "./MemberCreateDialog";
 import { RoleEditorDialog } from "./RoleEditorDialog";
-
 /** Displays workspace people; account creation and role controls are admin-only. */
 export function TeamView() {
-  const { data, members, go, setQuery, user, loading } = useWorkspace();
+  const { members, go, setQuery, user, loading } = useWorkspace();
   const [creating, setCreating] = useState(false);
   const [editingRole, setEditingRole] = useState<Member | null>(null);
   const isAdmin = user.role === "Admin";
@@ -44,9 +43,6 @@ export function TeamView() {
       )}
       <div className="team-grid">
         {members.map((member, i) => {
-          const tasks = data.tasks.filter(
-            (task) => task.assigneeId === member.id,
-          );
           return (
             <div className="team-grid-item" key={member.id}>
               <article className="team-card">
@@ -64,24 +60,15 @@ export function TeamView() {
                 <p>{member.role}</p>
                 <div className="team-metrics">
                   <span>
-                    <b>
-                      {tasks.filter((task) => task.status !== "Done").length}
-                    </b>
+                    <b>{member.task_open}</b>
                     Open tasks
                   </span>
                   <span>
-                    <b>
-                      {
-                        tasks.filter((task) => task.status === "In review")
-                          .length
-                      }
-                    </b>
+                    <b>{member.task_review}</b>
                     In review
                   </span>
                   <span>
-                    <b>
-                      {tasks.filter((task) => task.status === "Blocked").length}
-                    </b>
+                    <b>{member.task_blocked}</b>
                     Blocked
                   </span>
                 </div>

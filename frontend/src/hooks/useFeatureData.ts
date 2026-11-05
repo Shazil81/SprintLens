@@ -8,7 +8,7 @@ export function useFeatureData<T>(path: string) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [busy, setBusy] = useState(false);
-  const { reload: reloadWorkspace } = useWorkspace();
+  const { reload: reloadWorkspace, revision } = useWorkspace();
   const load = useCallback(
     async () => setItems(await listAll<T>(path)),
     [path],
@@ -31,7 +31,7 @@ export function useFeatureData<T>(path: string) {
     return () => {
       active = false;
     };
-  }, [path]);
+  }, [path, revision]);
   async function mutate(url: string, method: string, body: object) {
     if (busy) return false;
     setBusy(true);

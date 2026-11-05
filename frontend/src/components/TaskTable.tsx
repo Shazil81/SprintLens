@@ -3,8 +3,8 @@ import { statuses, type Status } from "../data";
 import { slug, initials, transitionMap } from "../utils/workspace";
 import { useWorkspace } from "../hooks/useWorkspace";
 /** Displays tasks and permits only status options allowed by the current UI rules. */
-export function TaskTable() {
-  const { view, visible, busy, role, user, changeStatus, setDetailTaskId } =
+export function TaskTable({ tasks }: { tasks: import("../data").Task[] }) {
+  const { busy, role, user, changeStatus, setDetailTaskId } =
     useWorkspace();
   return (
     <div className="table-wrap task-list-wrap">
@@ -20,7 +20,7 @@ export function TaskTable() {
           </tr>
         </thead>
         <tbody>
-          {(view === "Overview" ? visible.slice(0, 4) : visible).map((t) => (
+          {tasks.map((t) => (
             <tr key={t.id}>
               <td>
                 <span className="task-row-icon"><ListTodo size={19}/></span>
@@ -80,7 +80,7 @@ export function TaskTable() {
           ))}
         </tbody>
       </table>
-      {!visible.length && (
+      {!tasks.length && (
         <div className="empty">
           No tasks match these filters. Try another search.
         </div>
